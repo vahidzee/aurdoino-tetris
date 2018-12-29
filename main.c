@@ -32,7 +32,8 @@
     } Point;
 
     typedef struct {
-        Point * points;
+        Point points[4];
+        short type;
     } Block;
 
 
@@ -62,16 +63,24 @@
         }
     
     //Screen Methods
-    void show_screen( bool pixels[SCREEN_WIDTH][SCREEN_HEIGHT] ) {
+    void showScreenForMap( bool pixels[SCREEN_WIDTH][SCREEN_HEIGHT] ) {
         short deviceNumber = 0;
         for( int y = 0;y < SCREEN_HEIGHT;y++, deviceNumber = y/DEVICE_HEIGHT){
-           
-          
+            for( int x = 0; x < DEVICE_WIDTH ;  x++ ){
+                ledController.setLed( deviceNumber , DEVICE_HEIGHT - y - 1, DEVICE_WIDTH - x - 1 , pixels[x][y] );
+            } 
         }
     }
 
-    bool ** set_screen_map(Block liveBlock , bool bottomChunck[SCREEN_WIDTH][SCREEN_HEIGHT]) {
-
+    void showGameMap( ) {
+        bool map[SCREEN_WIDTH][SCREEN_HEIGHT];
+        for( int x = 0 ; x <SCREEN_WIDTH ; x++ )
+            for( int y = 0 ; y < SCREEN_HEIGHT ; y++ )
+                map[x][y] = bottomChunck[x][y];
+        for( int i = 0 ; i < 4 ; i++ ) {
+            map[liveBlock.points[i].x][liveBlock.points[i].y] = true;        
+        }
+        showScreenForMap(map);
     }
     //Game Logic
     bool isGameFinished( ) { /*  TODO jame live block va bottomChunk kolle safaro por kone */
@@ -114,9 +123,20 @@
     void setup(){
         init_ledController();
         init_buttons();
+
+        liveBlock.points[0].x = 0;
+        liveBlock.points[1].x = 0;
+        liveBlock.points[2].x = 0;
+        liveBlock.points[3].x = 0;
+
+        liveBlock.points[0].y = 15;
+        liveBlock.points[1].y = 14;
+        liveBlock.points[2].y = 13;
+        liveBlock.points[3].y = 12;
     }
 
     void loop(){ 
+        showGameMap();
         getAction();
-        
+
     }
