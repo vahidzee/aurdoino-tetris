@@ -230,15 +230,17 @@
         return;
 
       else if(liveBlock.type ==2){
-
-        // for( int i = 0 ; i < 4 ; i++ ){
-        //     int perv_x = liveBlock.points[i].x;
-        //     int perv_y = liveBlock.points[i].y;
-
-        //     liveBlock.points[i].x = -
-
-        // }
         
+  for( int i = 0 ; i < 4 ; i++ ){
+             int prev_x = liveBlock.points[i].x;
+             int prev_y = liveBlock.points[i].y;
+
+             liveBlock.points[i].x  = prev_y   -  liveBlock.points[1].y +liveBlock.points[1].x ;
+             liveBlock.points[i].y = -prev_x  + liveBlock.points[1].x + liveBlock.points[1].y ;
+
+         }
+        
+      
        
         
         
@@ -254,7 +256,7 @@
           liveBlock.points[3].y = newY - 1;
           
         }
-        else if(liveBlock.points[2].y == liveBlock.points[1].y)
+        else if((liveBlock.points[3].x == liveBlock.points[1].x ) && (liveBlock.points[0].x == liveBlock.points[1].x ) )
         { 
           liveBlock.points[0]. x = newX - 1;
           liveBlock.points[0].y = newY ;
@@ -331,6 +333,7 @@
 
 //Main
     void setup(){
+     
         init_ledController();
         init_buttons();
         generate_new_live_block();
