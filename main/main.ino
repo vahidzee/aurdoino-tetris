@@ -20,7 +20,7 @@
         //Joystick Pins
         #define JYS_X_PIN 0
         #define JYS_Y_PIN 1
-
+        #define JYS_BTN_PIN 7
         //Screen Size
         #define DEVICE_WIDTH 8
         #define DEVICE_HEIGHT 8
@@ -65,9 +65,26 @@
             pinMode(BTN_RIGHT_PIN, INPUT );
             pinMode(BTN_DOWN_PIN, INPUT );
             pinMode(BTN_ROTATE_PIN, INPUT );
+            pinMode(JYS_BTN_PIN, INPUT );
+
         }
-    
+
     //Screen Methods
+    void show_pause_screen() {
+        byte p[] = {B00000000,B00111000,B00100100,B00100100,B00111000,B00100000,B00100000,B00000000};
+        for(int i=0;i<8;i++)
+            ledController.setRow(SCREEN_HEIGHT/DEVICE_HEIGHT - 1,i,p[i]);
+        int i = 0;
+        while(true){
+            delay(1000);
+            if( digitalRead(JYS_BTN_PIN) == LOW )
+                break;
+        }
+        for(int i=0;i<8;i++)
+            ledController.setRow(SCREEN_HEIGHT/DEVICE_HEIGHT - 1,i,0);
+        
+    }
+    
     void showScreenForMap( bool pixels[SCREEN_WIDTH][SCREEN_HEIGHT] ) {
         short deviceNumber = 0;
         for( int y = 0;y < SCREEN_HEIGHT;y++){
@@ -301,14 +318,6 @@
 
     //Action Handling
     void getAction() {
-        // if( digitalRead(BTN_LEFT_PIN) == HIGH )
-        //     moveLiveBlockLeft();
-        // if( digitalRead(BTN_RIGHT_PIN) == HIGH )
-        //     moveLiveBlockRight();
-        // if( digitalRead(BTN_ROTATE_PIN) == HIGH )
-        //     rotateLiveBlock();
-        // if( digitalRead(BTN_DOWN_PIN) == HIGH )
-        //     moveLiveBlockDown();
         int x = analogRead(JYS_X_PIN);
 
         int y = analogRead(JYS_Y_PIN);
@@ -333,25 +342,25 @@
     void setup(){
         init_ledController();
         init_buttons();
+        show_pause_screen();
         generate_new_live_block();
         loop_counter = 0;
     }
 
     
     void loop(){ 
+       if( digitalRead(JYS_BTN_PIN) == HIGH )
+           show_pause_screen();
         getAction();
         showGameMap();
         loop_counter++;
         if( loop_counter == 2 ) {
             loop_counter = 0;
             moveLiveBlockDown();
-        } 
-
+        }
         if( live_block_reached_bottom_chunck() ) {
             register_live_block_to_bottom_chunck();
             generate_new_live_block();
         }
-         
-        
     }
  
