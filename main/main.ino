@@ -17,6 +17,10 @@
         #define BTN_DOWN_PIN 4
         #define BTN_ROTATE_PIN 3
 
+        //Joystick Pins
+        #define JYS_X_PIN 0
+        #define JYS_Y_PIN 1
+
         //Screen Size
         #define DEVICE_WIDTH 8
         #define DEVICE_HEIGHT 8
@@ -38,19 +42,12 @@
         short type;
     } Block;
 
-    
-
-
-
-int randomNumber;
-
-
 //Global Variables
     LedControl ledController = LedControl(SCREEN_DIN_PIN,SCREEN_CLK_PIN,SCREEN_CS_PIN,0);
 
     bool bottomChunck[SCREEN_WIDTH][SCREEN_HEIGHT] = {false};
     Block liveBlock;
-
+    int loop_counter = 0;
 //Functions
     //Setup & Init Functions
         void init_ledController() {
@@ -186,45 +183,48 @@ int randomNumber;
     }
 
     void moveLiveBlockLeft() {
-      short min = liveBlock.points[0].x;
-      for( int i = 0 ; i < 4 ; i++ ) 
-        min = ( liveBlock.points[i].x < min ) ? liveBlock.points[i].x : min;
-      if( min > 0 )
+        short min = liveBlock.points[0].x;
         for( int i = 0 ; i < 4 ; i++ ) 
-          liveBlock.points[i].x--;
+            min = ( liveBlock.points[i].x < min ) ? liveBlock.points[i].x : min;
+        if( min > 0 )
+            for( int i = 0 ; i < 4 ; i++ ) 
+                liveBlock.points[i].x--;
     }
+
+
     void moveLiveBlockRight(){
-      short max = liveBlock.points[0].x;
-      for( int i = 0 ; i < 4 ; i++ ) 
-        max = ( liveBlock.points[i].x > max ) ? liveBlock.points[i].x : max;
-      if( max < SCREEN_WIDTH - 1 )
+        short max = liveBlock.points[0].x;
         for( int i = 0 ; i < 4 ; i++ ) 
-          liveBlock.points[i].x++;
+            max = ( liveBlock.points[i].x > max ) ? liveBlock.points[i].x : max;
+        if( max < SCREEN_WIDTH - 1 )
+            for( int i = 0 ; i < 4 ; i++ ) 
+                liveBlock.points[i].x++;
     }
 
     void rotateLiveBlock() {
       // #####
-      if(liveBlock.type == 0) {
-        if(liveBlock.points[0].x == liveBlock.points[1].x) {
-          // amoodi
-          int newY = liveBlock.points[2].y ;
-          for(int i = 0 ; i < 4; i++)
-          liveBlock.points[i].y = newY;
-          int newX = liveBlock.points[2].x;
-          liveBlock.points[3].x = newX - 1;
-          liveBlock.points[1].x = newX +1;
-          liveBlock.points[0].x = newX +2;  }
-        else if(liveBlock.points[0].y == liveBlock.points[1].y)  {
-          //ofoghi
-          int newX = liveBlock.points[1].x;
-           for(int i = 0 ; i < 4; i++)
-          liveBlock.points[i].x = newX;
-          int newY = liveBlock.points[1].y;
-          liveBlock.points[0].y = newY + 1;
-          liveBlock.points[2].y = newY -1 ;
-          liveBlock.points[3].y = newY - 2;   
-          } 
-      }
+        if(liveBlock.type == 0) {
+            if(liveBlock.points[0].x == liveBlock.points[1].x) {
+                // amoodi
+                int newY = liveBlock.points[2].y ;
+                for(int i = 0 ; i < 4; i++)
+                liveBlock.points[i].y = newY;
+                int newX = liveBlock.points[2].x;
+                liveBlock.points[3].x = newX - 1;
+                liveBlock.points[1].x = newX +1;
+                liveBlock.points[0].x = newX +2;  
+            }
+            else if(liveBlock.points[0].y == liveBlock.points[1].y)  {
+                //ofoghi
+                int newX = liveBlock.points[1].x;
+                for(int i = 0 ; i < 4; i++)
+                liveBlock.points[i].x = newX;
+                int newY = liveBlock.points[1].y;
+                liveBlock.points[0].y = newY + 1;
+                liveBlock.points[2].y = newY -1 ;
+                liveBlock.points[3].y = newY - 2;   
+            } 
+        }
 
       else if(liveBlock.type == 1)  
         return;
@@ -293,21 +293,40 @@ int randomNumber;
     }
 
     void moveLiveBlockDown() { /* one step */
-      for( int i = 0 ; i < 4 ; i++ ) 
-        liveBlock.points[i].y--;
+        if( !live_block_reached_bottom_chunck() )
+            for( int i = 0 ; i < 4 ; i++ ) 
+                liveBlock.points[i].y--;
     }
 
 
     //Action Handling
     void getAction() {
-        if( digitalRead(BTN_LEFT_PIN) == HIGH )
+        // if( digitalRead(BTN_LEFT_PIN) == HIGH )
+        //     moveLiveBlockLeft();
+        // if( digitalRead(BTN_RIGHT_PIN) == HIGH )
+        //     moveLiveBlockRight();
+        // if( digitalRead(BTN_ROTATE_PIN) == HIGH )
+        //     rotateLiveBlock();
+        // if( digitalRead(BTN_DOWN_PIN) == HIGH )
+        //     moveLiveBlockDown();
+        int x = analogRead(JYS_X_PIN);
+
+        int y = analogRead(JYS_Y_PIN);
+        
+        //Left
+        if( x < 500 && y < 612 && y > 412 ){
             moveLiveBlockLeft();
-        if( digitalRead(BTN_RIGHT_PIN) == HIGH )
+        }
+        //Right
+        if( x > 520 && y < 612 && y > 412 ){
             moveLiveBlockRight();
-        if( digitalRead(BTN_ROTATE_PIN) == HIGH )
-            rotateLiveBlock();
-        if( digitalRead(BTN_DOWN_PIN) == HIGH )
+        }
+        //Down
+        if( y < 300 ) 
             moveLiveBlockDown();
+        //Up -> Rotate
+        if( y > 650 ) 
+            rotateLiveBlock();
     }
 
 //Main
@@ -315,23 +334,24 @@ int randomNumber;
         init_ledController();
         init_buttons();
         generate_new_live_block();
-        // randomSeed(second());
-//         Serial.begin(9600);
-//          randomSeed(second()); // nothing connected to 0 so read sees noise
-   
+        loop_counter = 0;
     }
 
+    
     void loop(){ 
-        showGameMap();
         getAction();
-        moveLiveBlockDown();
-        delay(200);
+        showGameMap();
+        loop_counter++;
+        if( loop_counter == 2 ) {
+            loop_counter = 0;
+            moveLiveBlockDown();
+        } 
+
         if( live_block_reached_bottom_chunck() ) {
             register_live_block_to_bottom_chunck();
             generate_new_live_block();
         }
-            
          
         
     }
-
+ 
