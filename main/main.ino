@@ -1,5 +1,5 @@
-#include <Time.h>
-#include <TimeLib.h>
+#include <time.h>
+#include<stdlib.h>
 #include <LedControl.h>
 
 
@@ -79,41 +79,20 @@ int randomNumber;
                 ledController.setLed( deviceNumber ,  DEVICE_WIDTH - x - 1, DEVICE_HEIGHT - y - 1 + deviceNumber * DEVICE_HEIGHT , pixels[x][y] );
             } 
         }
-//        ledController.setLed( deviceNumber ,0, 0 , true );
     }
-   void ReachedBottomchunck(){
-     int firstRowCounter = 0;
-      bool reached = false;
 
-      for(int i = 0 ; i < 8 ; i++)
-      if(bottomChunck[i][0] == false)
-      firstRowCounter ++;
-      
-      // bottomChunk is empty  
-      if(firstRowCounter == 8) {  
-          short min = liveBlock.points[0].y;
-      for( int i = 0 ; i < 4 ; i++ ) 
-        min = ( liveBlock.points[i].y < min ) ? liveBlock.points[i].y : min;
-        if(min  == 0 )
-        for(int j = 0 ; j < 4 ; j++)
-        bottomChunck[liveBlock.points[j].x][liveBlock.points[j].y] = true;
-      }
-     
-      else{
-        for(int i = 0 ; i< 4 ; i++){
-        if(bottomChunck[liveBlock.points[i].x][liveBlock.points[i].y] == true) 
-        reached  = true;
-           else 
-           reached = false;
-        }
-        if(reached == true)
-        for(int i = 0 ; i< 4 ; i++)
-        bottomChunck[liveBlock.points[i].x][liveBlock.points[i].y] = true;
-        
 
-      }
-      
-      
+    //Live Block Interactions
+    bool live_block_reached_bottom_chunck(){
+        for( int i = 0 ; i < 4 ; i++ )
+            if( liveBlock.points[i].y == 0 || bottomChunck[liveBlock.points[i].x][liveBlock.points[i].y - 1] == true )
+                return true;
+        return false;
+    }
+
+    void register_live_block_to_bottom_chunck() {
+        for( int i = 0 ; i < 4 ; i++ )
+            bottomChunck[liveBlock.points[i].x][liveBlock.points[i].y] = true;
     }
 
     void showGameMap( ) {
@@ -123,12 +102,81 @@ int randomNumber;
                 map[x][y] = bottomChunck[x][y];
         for( int i = 0 ; i < 4 ; i++ ) {
             map[liveBlock.points[i].x][liveBlock.points[i].y] = true; 
- 
         }
         showScreenForMap(map);
-        
     }
     //Game Logic
+    void generate_new_live_block( ){
+      
+        liveBlock.type = rand() % 6 ;
+         
+        if(liveBlock.type== 0)   {
+            liveBlock.points[0].x = 4;
+            liveBlock.points[1].x = 4;
+            liveBlock.points[2].x = 4;
+            liveBlock.points[3].x = 4;
+            liveBlock.points[0].y = SCREEN_HEIGHT - 1;
+            liveBlock.points[1].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[2].y = SCREEN_HEIGHT - 3;
+            liveBlock.points[3].y = SCREEN_HEIGHT - 4;
+        }
+        else if(liveBlock.type == 1){
+            liveBlock.points[0].x = 3;
+            liveBlock.points[1].x = 3;
+            liveBlock.points[2].x = 4;
+            liveBlock.points[3].x = 4;
+            liveBlock.points[0].y = SCREEN_HEIGHT - 1;
+            liveBlock.points[1].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[2].y = SCREEN_HEIGHT - 1;
+            liveBlock.points[3].y = SCREEN_HEIGHT - 2;
+        }
+        else if(liveBlock.type== 2)
+        {
+            liveBlock.points[0].x = 3;
+            liveBlock.points[1].x = 4;
+            liveBlock.points[2].x = 5;
+            liveBlock.points[3].x = 3;
+            liveBlock.points[0].y = SCREEN_HEIGHT - 1;
+            liveBlock.points[1].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[2].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[3].y = SCREEN_HEIGHT - 2;
+
+        }
+
+        else if(liveBlock.type == 3){
+            liveBlock.points[0].x = 4;
+            liveBlock.points[1].x = 4;
+            liveBlock.points[2].x = 5;
+            liveBlock.points[3].x = 3;
+
+            liveBlock.points[0].y = SCREEN_HEIGHT - 1;
+            liveBlock.points[1].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[2].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[3].y = SCREEN_HEIGHT - 2;
+        }
+        else if(liveBlock.type == 4){
+            liveBlock.points[0].x = 5;
+            liveBlock.points[1].x = 4;
+            liveBlock.points[2].x = 5;
+            liveBlock.points[3].x = 3;
+            liveBlock.points[0].y = SCREEN_HEIGHT - 1;
+            liveBlock.points[1].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[2].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[3].y = SCREEN_HEIGHT - 2;
+        }
+        else if(liveBlock.type == 5){
+            liveBlock.points[0].x = 5;
+            liveBlock.points[1].x = 4;
+            liveBlock.points[2].x = 4;
+            liveBlock.points[3].x = 3;
+            liveBlock.points[0].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[1].y = SCREEN_HEIGHT - 1;
+            liveBlock.points[2].y = SCREEN_HEIGHT - 2;
+            liveBlock.points[3].y = SCREEN_HEIGHT - 1;
+        }
+    }
+
+
     bool isGameFinished( ) { /*  TODO jame live block va bottomChunk kolle safaro por kone */
         return false;
     }
@@ -174,36 +222,32 @@ int randomNumber;
           int newY = liveBlock.points[1].y;
           liveBlock.points[0].y = newY + 1;
           liveBlock.points[2].y = newY -1 ;
-          liveBlock.points[3].y = newY - 2;   } 
+          liveBlock.points[3].y = newY - 2;   
+          } 
       }
 
       else if(liveBlock.type == 1)  
-      return;
+        return;
 
       else if(liveBlock.type ==2){
-        if((liveBlock.points[0].x == liveBlock.points[3].x )&& (liveBlock.points[0].y >liveBlock.points[1].y))  {
-         int  newX = liveBlock.points[1].x ;
-             liveBlock.points[3].x = newX + 1;
-             liveBlock.points[2].x = newX - 1;
-             liveBlock.points[0].x = newX +1;
-         int  newY = liveBlock.points[1].y;
-          liveBlock.points[3].y = newY++;
-          liveBlock.points[2].y = newY --;
-           liveBlock.points[0].y = newY++;
-           
+
+        // for( int i = 0 ; i < 4 ; i++ ){
+        //     int perv_x = liveBlock.points[i].x;
+        //     int perv_y = liveBlock.points[i].y;
+
+        //     liveBlock.points[i].x = -
+
+        // }
         
-        }
-         else
-          return;
+       
+        
         
         
       }
 
       else if(liveBlock.type == 3) {
-      //#
-     //###
-           int newX =  liveBlock.points[1].x;
-          int newY =  liveBlock.points[1].y;
+        int newX =  liveBlock.points[1].x;
+        int newY =  liveBlock.points[1].y;
         if(liveBlock.points[0].x == liveBlock.points[1].x) {
           
           liveBlock.points[3]. x = newX;
@@ -227,24 +271,21 @@ int randomNumber;
         }
         
       }
-
       else if(liveBlock.type == 4){
         
       }
-
-
       else if(liveBlock.type == 5) {
         int newX = liveBlock.points[2].x;
-         int newY = liveBlock.points[2].y;
+        int newY = liveBlock.points[2].y;
         
         if(liveBlock.points[1].y == liveBlock.points[3].y) {
-          liveBlock.points[3].x = newX + 1;
-         liveBlock.points[3].y = newY - 1;
+        liveBlock.points[3].x = newX + 1;
+        liveBlock.points[3].y = newY - 1;
           
         }
         else if(liveBlock.points[0].x == liveBlock.points[3].x){
             liveBlock.points[3].x = newX - 1;
-         liveBlock.points[3].y = newY + 1;
+            liveBlock.points[3].y = newY + 1;
         }
        
       }
@@ -273,104 +314,23 @@ int randomNumber;
     void setup(){
         init_ledController();
         init_buttons();
+        generate_new_live_block();
         // randomSeed(second());
 //         Serial.begin(9600);
 //          randomSeed(second()); // nothing connected to 0 so read sees noise
-liveBlock.type = 5 ;
-
-     if(liveBlock.type== 0)   {
-      //  #
-     //   #
-      //  #
-    //    #
-        liveBlock.points[0].x = 4;
-        liveBlock.points[1].x = 4;
-        liveBlock.points[2].x = 4;
-        liveBlock.points[3].x = 4;
-        liveBlock.points[0].y = 31;
-        liveBlock.points[1].y = 30;
-        liveBlock.points[2].y = 29;
-        liveBlock.points[3].y = 28;
-     }
- 
-else if(liveBlock.type == 1){
-  //##
-  //##
-        liveBlock.points[0].x = 3;
-        liveBlock.points[1].x = 3;
-        liveBlock.points[2].x = 4;
-        liveBlock.points[3].x = 4;
-        liveBlock.points[0].y = 31;
-        liveBlock.points[1].y = 30;
-        liveBlock.points[2].y = 31;
-        liveBlock.points[3].y = 30;
-  
-}
-else if(liveBlock.type== 2)
-{
-  //#
- // ###
-        liveBlock.points[0].x = 3;
-        liveBlock.points[1].x = 4;
-        liveBlock.points[2].x = 5;
-        liveBlock.points[3].x = 3;
-        liveBlock.points[0].y = 31;
-        liveBlock.points[1].y = 30;
-        liveBlock.points[2].y = 30;
-        liveBlock.points[3].y = 30;
-
-}
-
-else if(liveBlock.type == 3){
-  // #
-  //###
-
-        liveBlock.points[0].x = 4;
-        liveBlock.points[1].x = 4;
-        liveBlock.points[2].x = 5;
-        liveBlock.points[3].x = 3;
-
-        liveBlock.points[0].y = 31;
-        liveBlock.points[1].y = 30;
-        liveBlock.points[2].y = 30;
-        liveBlock.points[3].y = 30;
-
-  
-}
-else if(liveBlock.type == 4){
-  //  #
- // ###
-        liveBlock.points[0].x = 5;
-        liveBlock.points[1].x = 4;
-        liveBlock.points[2].x = 5;
-        liveBlock.points[3].x = 3;
-        liveBlock.points[0].y = 31;
-        liveBlock.points[1].y = 30;
-        liveBlock.points[2].y = 30;
-        liveBlock.points[3].y = 30;
-}
-else if(liveBlock.type == 5){
-  //##
-  // ##
-
-        liveBlock.points[0].x = 5;
-        liveBlock.points[1].x = 4;
-        liveBlock.points[2].x = 4;
-        liveBlock.points[3].x = 3;
-        liveBlock.points[0].y = 30;
-        liveBlock.points[1].y = 31;
-        liveBlock.points[2].y = 30;
-        liveBlock.points[3].y = 31;
-}
+   
     }
 
     void loop(){ 
-      randomNumber = random(0,second());
-      printf("%d " ,randomNumber); 
         showGameMap();
         getAction();
         moveLiveBlockDown();
-        delay(500);
+        delay(200);
+        if( live_block_reached_bottom_chunck() ) {
+            register_live_block_to_bottom_chunck();
+            generate_new_live_block();
+        }
+            
          
         
     }
