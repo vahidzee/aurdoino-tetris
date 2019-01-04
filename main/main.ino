@@ -216,14 +216,15 @@
     }
 
     //Game Logic
-    void start_new_game() {
-        show_load_screen();
-
-        //Clearing bottom chunck
+    void clear_bottom_chunck() {
         for(int i = 0; i < SCREEN_WIDTH; i++ )
             for(int j = 0; j < SCREEN_HEIGHT; j++ )
                 bottom_chunk[i][j] = false;
 
+    }
+    void start_new_game() {
+        show_load_screen();
+        clear_bottom_chunck();
         generate_new_live_block();
         loop_counter = 0;
     }
@@ -357,17 +358,20 @@
     void setup(){
         init_joy_stick();
         init_led_controller();
-        
+        show_load_screen();        
         start_new_game();
     }
 
     
     void loop(){ 
         loop_counter++;
-        if( loop_counter == 3 ) {
-            loop_counter = 0;
+        if( loop_counter % 3 == 0 ) {
             move_live_block_down();
         } 
+        if( loop_counter == 1100 ){
+            clear_bottom_chunck();
+            loop_counter = 0;            
+        }
         getAction();
         show_game_map();
         if( live_block_reached_bottom_chunck() ) {
@@ -377,7 +381,7 @@
             generate_new_live_block();
             show_game_map();
             if(live_block_reached_bottom_chunck()){
-                delay(1000);
+                delay(1000);      
                 start_new_game();
             }
         }
