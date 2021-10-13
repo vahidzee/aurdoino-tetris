@@ -24,4 +24,4 @@ Both the `main.c` and `main.ino` implementations are essensially the same and th
 * Everything else is basically plug n' play!
 
 ## LICENSE
-MIT LICENSE, See [LISENCE](https://github.com/vahidzee/aurdoino-tetris/blob/master/LISENCE).
+MIT LICENSE, See [LISENCE](https://github.com/vahidzee/aurdoino-tetris/blob/master/LICENSE).
